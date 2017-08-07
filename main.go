@@ -25,6 +25,7 @@ type Options struct {
 	Stream    bool `short:"S" long:"stream" description:"listen to the AMQP stream - broken"`
 	Toggle    bool `short:"t" long:"toggle" description:"toggles all lights"`
 	Rainbow   bool `short:"r" long:"rainbow" description:"sends the glow ring through the rainbow"`
+	Update    bool `short:"u" description:"update state"`
 }
 
 func main() {
@@ -49,12 +50,27 @@ func main() {
 		stream()
 	case options.Toggle:
 		toggleLights(st)
+		writeState(st)
 	case options.DumpState:
 		spew.Dump(st)
 	case options.Rainbow:
 		rainbow(st)
+	case options.Update:
+		update(st)
 	default:
 		fmt.Println("need an action. run with --help for a list")
+	}
+}
+
+func update(st libplum.State) {
+	for _, house := range st.Houses {
+		for _, room := range house.Rooms {
+			for _, load := range room.LogicalLoads {
+				for _, lightpad := range load.Lightpads {
+					lightpad.Update(st.Conf)
+				}
+			}
+		}
 	}
 }
 
