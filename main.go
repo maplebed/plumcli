@@ -33,24 +33,13 @@ func main() {
 	flagParser := flag.NewParser(&options, flag.Default)
 	flagParser.Parse()
 
-	libplum.UserAgentAddition = "cli/0.1.0"
-
-	stDump, err := ioutil.ReadFile(stateFilePath)
-	if err != nil {
-		panic(err)
-	}
-	st, err := libplum.LoadState(stDump)
-	if err != nil {
-		panic(err)
-	}
 	switch {
 	case options.Daemon:
 		daemon()
 	case options.Stream:
 		stream()
 	case options.Toggle:
-		toggleLights(st)
-		writeState(st)
+		toggleLights(h)
 	case options.DumpState:
 		spew.Dump(st)
 	case options.Rainbow:
@@ -74,7 +63,7 @@ func update(st libplum.State) {
 	}
 }
 
-func toggleLights(st libplum.State) {
+func toggleLights(h libplum.House) {
 	lps := libplum.Lightpads(st)
 	wg := sync.WaitGroup{}
 	for _, lp := range lps {
